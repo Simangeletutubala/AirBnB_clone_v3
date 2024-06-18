@@ -15,9 +15,9 @@ class State(BaseModel, Base):
     __tablename__ = 'states'
     name = Column(String(128), nullable=False)
 
-    if models.storage_t == 'db':
+    if models.storage_type == 'db':
         cities = relationship("City", backref="state", cascade="all, delete-orphan")
-    elif models.storage_t == 'file':
+    elif models.storage_type == 'file':
         @property
         def cities(self):
             from models import storage
