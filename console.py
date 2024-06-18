@@ -105,15 +105,15 @@ class HBNBCommand(cmd.Cmd):
         the class name
         """
         if len(line.split()) == 0:
-            result = storage.all().values()
+            result = list(storage.all().values())  # Convert dict_values to list
         else:
             obj_cls = self.get_class_from_input(line)
-            if obj_cls is None:
-                return
-            result = list(filter(lambda item: isinstance(
-                item, obj_cls), storage.all().values()))
+        if obj_cls is None:
+            return
+        result = [item for item in storage.all().values() if isinstance(item, obj_cls)]
 
         print([str(item) for item in result])
+
 
     def do_update(self, line):
         """updates an instance based on the class name and id by adding or
