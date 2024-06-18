@@ -6,54 +6,31 @@ This Module contains a definition for BaseModel Class
 
 import uuid
 from datetime import datetime
-
 import models
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, DateTime
+from datetime import datetime
 
+Base = declarative_base()
 
-class BaseModel:
-    """BaseModel Class"""
+class BaseModel(Base):
+    __abstract__ = True
 
-    def __init__(self, *args, **kwargs):
-        """__init__ method & instantiation of class Basemodel
-
-        Args:
-            *args.
-            **kwargs (dict): Key/value pairs
-        """
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-
-        if kwargs is not None and len(kwargs) > 0:
-            for k, v in kwargs.items():
-                if k == "__class__":
-                    continue
-                elif k in ["created_at", "updated_at"]:
-                    setattr(self, k, datetime.fromisoformat(v))
-                else:
-                    setattr(self, k, v)
-        else:
-            models.storage.new(self)
+    id = Column(String(60), primary_key=True, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
     def save(self):
-        """Update updated_at with the current datetime."""
-        self.updated_at = datetime.now()
+        models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self):
-        """
-        returns a dictionary containing all
-        keys/values of __dict__ of the instance
-        """
-        bs_dict = (
-            {
-                k: (v.isoformat() if isinstance(v, datetime) else v)
-                for (k, v) in self.__dict__.items()
-            }
-        )
-        bs_dict["__class__"] = self.__class__.__name__
-        return bs_dict
+    def delete(self):
+        models.storage.delete(self)
 
-    def __str__(self) -> str:
-        """should print/str representation of the BaseModel instance."""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+    def to_dict(self):
+        dict_copy = self.__dict__.copy()
+        dict_copy.pop('_sa_instance_state', None)
+        dict_copy['__class__'] = self.__class__.__name__
+        dict_copy['created_at'] = dict_copy['created_at'].isoformat()
+        dict_copy['updated_at'] = dict_copy['updated_at'].isoformat()
+        return dict_copy
