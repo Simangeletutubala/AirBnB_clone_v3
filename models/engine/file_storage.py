@@ -93,3 +93,15 @@ class FileStorage:
                          "text": str}
         }
         return attributes
+
+    def delete(self, obj=None):
+        if obj is not None:
+            key = "{}.{}".format(obj.__class__.__name__, obj.id)
+            if key in self.__objects:
+                del self.__objects[key]
+
+    def all(self, cls=None):
+        if cls is not None:
+            return [obj for key, obj in self.__objects.items() if key.split('.')[0] == cls.__name__]
+        else:
+            return self.__objects.values()
