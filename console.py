@@ -38,13 +38,35 @@ class HBNBCommand(cmd.Cmd):
         """
         pass
 
-    def do_create(self, line):
-        """creates a new object and saves it"""
-        obj_cls = self.get_class_from_input(line)
-        if obj_cls is not None:
-            new_obj = obj_cls()
-            new_obj.save()
-            print(new_obj.id)
+    def do_create(self, arg):
+    """Create a new instance of a class with given parameters"""
+    if not arg:
+        print("** class name missing **")
+        return
+
+    args = arg.split()
+    class_name = args[0]
+    if class_name not in self.classes:
+        print("** class doesn't exist **")
+        return
+
+    if len(args) == 1:
+        print("** instance id missing **")
+        return
+
+    params = ' '.join(args[1:]).split(',')
+    new_dict = {}
+    for param in params:
+        key_val = param.split('=')
+        if len(key_val) != 2:
+            continue
+        key = key_val[0]
+        value = key_val[1].replace('_', ' ').replace('\\"', '"')
+        new_dict[key] = value
+
+    new_instance = self.classes[class_name](**new_dict)
+    new_instance.save()
+    print(new_instance.id)
 
     def do_show(self, line):
         """prints the string representation of an instance based on name and id
