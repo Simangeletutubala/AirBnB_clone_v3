@@ -36,8 +36,13 @@ class Place(BaseModel, Base):
     
     @property
     def reviews(self):
-        return [review for review in self.reviews if review.place_id == self.id]
+        return [review for review in self.reviews if review.place_id == self.id]  
 
+    @property
+    def amenities(self):
+        """Getter for amenities"""
+        return [amenity for amenity in self.amenities]
+    
     @amenities.setter
     def amenities(self, value):
         """Setter for amenities"""
@@ -45,8 +50,3 @@ class Place(BaseModel, Base):
             self.amenity_ids = [amenity.id for amenity in value]
         else:
             self.amenity_ids = [value.id]
-
-    @property
-    def amenities(self):
-        """Getter for amenities"""
-        return [amenity for amenity in self.amenities]
