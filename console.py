@@ -10,8 +10,7 @@ import json
 import re
 from typing import cast
 from models import storage
-import re
-import json
+
 
 
 class HBNBCommand(cmd.Cmd):
@@ -27,11 +26,6 @@ class HBNBCommand(cmd.Cmd):
         print()
         return True
 
-    def do_quit(self, line):
-        """Exits the program.
-        """
-        return True
-
     def emptyline(self):
         """prevents default behavior of cmd to ignore running command on
         empty line plus enter
@@ -39,34 +33,34 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, arg):
-    """Create a new instance of a class with given parameters"""
-    if not arg:
-        print("** class name missing **")
-        return
+        """Create a new instance of a class with given parameters"""
+        if not arg:
+            print("** class name missing **")
+            return
 
-    args = arg.split()
-    class_name = args[0]
-    if class_name not in self.classes:
-        print("** class doesn't exist **")
-        return
+        args = arg.split()
+        class_name = args[0]
+        if class_name not in self.classes:
+            print("** class doesn't exist **")
+            return
 
-    if len(args) == 1:
-        print("** instance id missing **")
-        return
+        if len(args) == 1:
+            print("** instance id missing **")
+            return
 
-    params = ' '.join(args[1:]).split(',')
-    new_dict = {}
-    for param in params:
-        key_val = param.split('=')
-        if len(key_val) != 2:
-            continue
-        key = key_val[0]
-        value = key_val[1].replace('_', ' ').replace('\\"', '"')
-        new_dict[key] = value
+        params = ' '.join(args[1:]).split(',')
+        new_dict = {}
+        for param in params:
+            key_val = param.split('=')
+            if len(key_val) != 2:
+                continue
+            key = key_val[0]
+            value = key_val[1].replace('_', ' ').replace('\\"', '"')
+            new_dict[key] = value
 
-    new_instance = self.classes[class_name](**new_dict)
-    new_instance.save()
-    print(new_instance.id)
+        new_instance = self.classes[class_name](**new_dict)
+        new_instance.save()
+        print(new_instance.id)
 
     def do_show(self, line):
         """prints the string representation of an instance based on name and id
