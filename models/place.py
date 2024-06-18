@@ -32,16 +32,21 @@ class Place(BaseModel, Base):
     reviews = relationship("Review", backref="place", cascade="all, delete-orphan")
     
     # Define the many-to-many relationship with Amenity
-    amenities = relationship("Amenity", secondary=place_amenity, viewonly=False)
+    amenities = relationship("Amenity", secondary=place_amenity, backref="places")
     
     @property
     def reviews(self):
         return [review for review in self.reviews if review.place_id == self.id]
-    
+
     @amenities.setter
-    def amenities(self, obj):
-        if isinstance(obj, Amenity):
-            if obj not in self.amenities:
-                self.amenities.append(obj)
+    def amenities(self, value):
+        """Setter for amenities"""
+        if isinstance(value, list):
+            self.amenity_ids = [amenity.id for amenity in value]
         else:
-            return
+            self.amenity_ids = [value.id]
+
+    @property
+    def amenities(self):
+        """Getter for amenities"""
+        return [amenity for amenity in self.amenities]
