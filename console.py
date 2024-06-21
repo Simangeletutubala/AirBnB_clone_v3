@@ -152,7 +152,7 @@ class HBNBCommand(cmd.Cmd):
 
             o = storage.all(eval(args[0]))
             print([str(obj) for obj in o])
-
+            
 
         except NameError:
             print("** class doesn't exist **")
