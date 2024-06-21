@@ -128,28 +128,21 @@ class TestHBNBCommand(unittest.TestCase):
         """Test create command with kwargs."""
         # Test create command with additional key-value pairs
         with patch("sys.stdout", new=StringIO()) as f:
-            call = 'create Place city_id="0001" name="My_house" number_rooms=4 latitude=37.77 longitude=43.434'
+            call = (f'create Place city_id="0001" name="My_house" number_rooms=4 latitude=37.77 longitude=43.434')  # noqa
             self.HBNB.onecmd(call)
-            pl_output = f.getvalue().strip()
-
-        # Print to verify pl_output after create command
-        print("pl_output:", pl_output)
-
-        # Test if the created instance and kwargs are in the output of "all" command
+            pl = f.getvalue().strip()
+         # Test if the created instance and kwargs are in the
+         #    output of "all" command
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all Place")
-            all_output = f.getvalue()
+            output = f.getvalue()
+            self.assertIn(pl, output)
+            self.assertIn("'city_id': '0001'", output)
+            self.assertIn("'name': 'My house'", output)
+            self.assertIn("'number_rooms': 4", output)
+            self.assertIn("'latitude': 37.77", output)
+            self.assertIn("'longitude': 43.434", output)
 
-        # Print to verify all_output after all Place command
-        print("all_output:", all_output)
-
-        # Assertions
-        self.assertIn(pl_output, all_output)
-        self.assertIn("'city_id': '0001'", all_output)
-        self.assertIn("'name': 'My_house'", all_output)
-        self.assertIn("'number_rooms': 4", all_output)
-        self.assertIn("'latitude': 37.77", all_output)
-        self.assertIn("'longitude': 43.434", all_output)
 
 if __name__ == "__main__":
     unittest.main()
