@@ -1,15 +1,17 @@
 #!/usr/bin/python3
-"""Creates a unique storage instance for the application"""
+"""Instantiates a storage object.
 
-from models.engine.file_storage import FileStorage
-from models.engine.db_storage import DBStorage
+-> If the environmental variable 'HBNB_TYPE_STORAGE' is set to 'db',
+   instantiates a database storage engine (DBStorage).
+-> Otherwise, instantiates a file storage engine (FileStorage).
+"""
 from os import getenv
 
-HBNB_TYPE_STORAGE = getenv('HBNB_TYPE_STORAGE')
-
-if HBNB_TYPE_STORAGE == "db":
+if getenv("HBNB_TYPE_STORAGE") == "db":
+    from models.engine.db_storage import DBStorage
     storage = DBStorage()
 else:
+    from models.engine.file_storage import FileStorage
     storage = FileStorage()
-
+    
 storage.reload()

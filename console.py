@@ -151,7 +151,8 @@ class HBNBCommand(cmd.Cmd):
                 raise NameError()
 
             o = storage.all(eval(args[0]))
-            print([o[k].__str__() for k in o])
+            print([str(obj) for obj in o])
+
 
         except NameError:
             print("** class doesn't exist **")
@@ -270,4 +271,3 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
-    

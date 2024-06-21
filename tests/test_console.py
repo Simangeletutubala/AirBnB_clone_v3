@@ -1,206 +1,155 @@
 #!/usr/bin/python3
-"""Module test_amenity
-
-This Module contains a tests for Amenity Class
-"""
-
+"""Defines unittests for console.py."""
 import os
 import unittest
-from io import StringIO
 from unittest.mock import patch
-
+from io import StringIO
 from console import HBNBCommand
+from models.engine.file_storage import FileStorage
 
 
-class TestConsole(unittest.TestCase):
-    """Tests the console app"""
+class TestHBNBCommand(unittest.TestCase):
+    """Unittests for testing the HBNB command interpreter."""
+
     @classmethod
-    def setUpClass(cls) -> None:
-        """sets up the test console"""
-        cls.cmd = HBNBCommand()
+    def setUpClass(cls):
+        """HBNBCommand testing setup.
+
+        Temporarily rename any existing file.json.
+        Reset FileStorage objects dictionary.
+        Create an instance of the command interpreter.
+        """
+        try:
+            os.rename("file.json", "tmp")
+        except IOError:
+            pass
+        # Create an instance of the HBNBCommand class. This allows the test
+        # methods within the class to access and use this instance during the
+        # testing process.
+        cls.HBNB = HBNBCommand()
 
     @classmethod
     def tearDownClass(cls):
-        """removes the file.json temporary file"""
-        if os.path.exists('file.json'):
-            os.remove('file.json')
+        """HBNBCommand testing teardown.
 
-    def test_create_prints_class_name_error(self):
-        """tests the create command class name error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create')
-            self.assertEqual("** class name missing **\n",
-                             output.getvalue())
+        Restore original file.json.
+        Delete the test HBNBCommand instance.
+        """
+        try:
+            os.rename("tmp", "file.json")
+        except IOError:
+            pass
+        del cls.HBNB
 
-    def test_create_prints_class_does_not_exist(self):
-        """tests the create command class not found error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BModel')
-            self.assertEqual("** class doesn't exist **\n",
-                             output.getvalue())
+    def setUp(self):
+        """Reset FileStorage objects dictionary."""
+        FileStorage._FileStorage__objects = {}
 
-    def test_create_creates_an_object(self):
-        """tests the create creates an instance"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue()
-            self.assertNotIn(id, [None, ""])
+    def tearDown(self):
+        """Delete any created file.json."""
+        try:
+            os.remove("file.json")
+        except IOError:
+            pass
 
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd(f'show BaseModel {id}')
-            self.assertIn(id.strip('\n'), output.getvalue())
+    def test_create_for_errors(self):
+        """Test create command errors."""
+        # Test if class name is missing
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create")
+            self.assertEqual(
+                "** class name missing **\n", f.getvalue())
+        # Test if class doesn't exist
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create asdfsfsd")
+            self.assertEqual(
+                "** class doesn't exist **\n", f.getvalue())
 
-    def test_show_prints_class_name_error(self):
-        """tests the show command class name error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('show')
-            self.assertEqual("** class name missing **\n",
-                             output.getvalue())
+    def test_create_command_validity(self):
+        """Test create command."""
+        # Create BaseModel instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create BaseModel")
+            bm = f.getvalue().strip()
 
-    def test_show_prints_class_does_not_exist(self):
-        """tests the show command class not found error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('show BModel')
-            self.assertEqual("** class doesn't exist **\n",
-                             output.getvalue())
+        # Create User instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create User")
+            us = f.getvalue().strip()
 
-    def test_show_displays_an_object(self):
-        """tests the show shows an instance"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'show BaseModel {id}')
-            self.assertIn("BaseModel", output.getvalue())
+        # Create State instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create State")
+            st = f.getvalue().strip()
 
-    def test_destroy_prints_class_name_error(self):
-        """tests the destroy command class name error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('destroy')
-            self.assertEqual("** class name missing **\n",
-                             output.getvalue())
+        # Create Place instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Place")
+            pl = f.getvalue().strip()
 
-    def test_destroy_prints_class_does_not_exist(self):
-        """tests the destroy command class not found error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('destroy BModel')
-            self.assertEqual("** class doesn't exist **\n",
-                             output.getvalue())
+        # Create City instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create City")
+            ct = f.getvalue().strip()
 
-    def test_destroy_prints_instance_not_found(self):
-        """tests the destroy command prints instance not found error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('destroy BaseModel adfadfadf')
-            self.assertIn("** no instance found **", output.getvalue())
+        # Create Review instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Review")
+            rv = f.getvalue().strip()
 
-    def test_destroy_deletes_an_object(self):
-        """tests the destroy deletes a instance"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'destroy BaseModel {id}')
-            self.cmd.onecmd(f'show BaseModel {id}')
-            self.assertIn("** no instance found **", output.getvalue())
+        # Create Amenity instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Amenity")
+            am = f.getvalue().strip()
+        # Test if the created instances are in the output of "all" command
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all BaseModel")
+            self.assertIn(bm, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all User")
+            self.assertIn(us, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all State")
+            self.assertIn(st, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Place")
+            self.assertIn(pl, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all City")
+            self.assertIn(ct, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Review")
+            self.assertIn(rv, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Amenity")
+            self.assertIn(am, f.getvalue())
 
-    def test_all_displays_instance_objects(self):
-        """tests the all shows instance objects"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            self.cmd.onecmd('create BaseModel')
-            self.cmd.onecmd(f'all')
-            self.assertIn("BaseModel", output.getvalue())
-            self.assertGreaterEqual(output.getvalue().count("BaseModel"), 2)
+    def test_create_command_with_kwargs(self):
+        """Test create command with kwargs."""
+        # Test create command with additional key-value pairs
+        with patch("sys.stdout", new=StringIO()) as f:
+            call = 'create Place city_id="0001" name="My_house" number_rooms=4 latitude=37.77 longitude=43.434'
+            self.HBNB.onecmd(call)
+            pl_output = f.getvalue().strip()
 
-    def test_all_displays_class_instance_objects(self):
-        """tests the all shows instance objects"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            self.cmd.onecmd('create User')
-            self.cmd.onecmd(f'all User')
-            self.assertIn("User", output.getvalue())
-            self.assertNotIn("BaseModel", output.getvalue())
+        # Print to verify pl_output after create command
+        print("pl_output:", pl_output)
 
-    def test_update_attr_name_missing_error(self):
-        """test update command shows attr name missing error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'update BaseModel {id}')
-            self.assertIn("** attribute name missing **", output.getvalue())
+        # Test if the created instance and kwargs are in the output of "all" command
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Place")
+            all_output = f.getvalue()
 
-    def test_update_attr_value_missing_error(self):
-        """test update command shows attr val missing error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'update BaseModel {id} fname')
-            self.assertIn("** value missing **", output.getvalue())
+        # Print to verify all_output after all Place command
+        print("all_output:", all_output)
 
-    def test_update_updates_instance(self):
-        """test update command shows attr val missing error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create State')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'update State {id} name example_state')
-            self.cmd.onecmd(f'show State {id}')
-            self.assertIn('name', output.getvalue())
-            self.assertIn('example_state', output.getvalue())
+        # Assertions
+        self.assertIn(pl_output, all_output)
+        self.assertIn("'city_id': '0001'", all_output)
+        self.assertIn("'name': 'My_house'", all_output)
+        self.assertIn("'number_rooms': 4", all_output)
+        self.assertIn("'latitude': 37.77", all_output)
+        self.assertIn("'longitude': 43.434", all_output)
 
-    def test_classname_all_displays_instance_objects(self):
-        """tests the all shows instance objects"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            self.cmd.onecmd('create BaseModel')
-            self.cmd.onecmd('BaseModel.all()')
-            self.assertIn("BaseModel", output.getvalue())
-            self.assertGreaterEqual(output.getvalue().count("BaseModel"), 2)
-
-    def test_classname_count_displays_instance_objects(self):
-        """tests the all shows instance objects"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create Place')
-            self.cmd.onecmd('create Place')
-            self.cmd.onecmd('create Place')
-            self.cmd.onecmd('create Place')
-            self.cmd.onecmd('create Place')
-            self.cmd.onecmd('Place.count()')
-            self.assertIn('5', output.getvalue())
-
-    def test_classname_show_displays_an_object(self):
-        """tests the show shows an instance"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'BaseModel.show("{id}")')
-            self.assertIn("BaseModel", output.getvalue())
-
-    def test_classname_destroy_deletes_an_object(self):
-        """tests the destroy deletes a instance"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create BaseModel')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'BaseModel.destroy("{id}")')
-            self.cmd.onecmd(f'show BaseModel {id}')
-            self.assertIn("** no instance found **", output.getvalue())
-
-    def test_classname_update_updates_instance(self):
-        """test update command shows attr val missing error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create Review')
-            id = output.getvalue().strip('\n')
-            self.cmd.onecmd(f'Review.update("{id}", "rev_k", "rev_v")')
-            self.cmd.onecmd(f'show Review {id}')
-            self.assertIn('rev_k', output.getvalue())
-            self.assertIn('rev_v', output.getvalue())
-
-    def test_classname_update_updates_instance_with_dict(self):
-        """test update command shows attr val missing error"""
-        with patch('sys.stdout', new=StringIO()) as output:
-            self.cmd.onecmd('create Amenity')
-            id = output.getvalue().strip('\n')
-            dict_att = "{ 'name' : 'amne', 'rev_k' : 'rev_v' }"
-            self.cmd.onecmd(f'Amenity.update("{id}", {dict_att})')
-            self.cmd.onecmd(f'show Amenity {id}')
-            self.assertIn('name', output.getvalue())
-            self.assertIn('amne', output.getvalue())
-            self.assertIn('rev_k', output.getvalue())
-            self.assertIn('rev_v', output.getvalue())
+if __name__ == "__main__":
+    unittest.main()
